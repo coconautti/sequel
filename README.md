@@ -1,5 +1,7 @@
 # sequel
 
+[![Build Status](https://travis-ci.org/coconautti/sequel.svg?branch=master)](https://travis-ci.org/coconautti/sequel)
+
 A lightweight SQL query DSL for Kotlin. The library is in an early stage of development, so don't expect the DSL to support anything fancy.
  
 # Getting started
