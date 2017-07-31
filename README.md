@@ -110,6 +110,6 @@ Just as with `insertInto()`, `batchInserInto()` will return a list of generated 
 
 # Todo
 
-- [ ] Add CI for PRs
+- [X] Add CI for PRs
 - [ ] Add support for joins
 - [ ] Release 0.2.0
