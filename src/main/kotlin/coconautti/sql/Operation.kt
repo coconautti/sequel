@@ -7,10 +7,7 @@ interface Operation {
 abstract class Op(internal val lh: Column, internal val rh: Value) : Operation {
     infix fun and(other: Op) = And(this, other)
     infix fun or(other: Op) = Or(this, other)
-
-    override fun values(): List<Value> {
-        return listOf(rh)
-    }
+    override fun values(): List<Value> = listOf(rh)
 }
 
 class Equal(lh: Column, rh: Value) : Op(lh, rh) {
@@ -37,9 +34,7 @@ class LessThanOrEqual(lh: Column, rh: Value) : Op(lh, rh) {
 }
 
 abstract class CompositeOp(internal val lh: Op, internal val rh: Op) : Operation {
-    override fun values(): List<Value> {
-        return listOf(lh.values().first(), rh.values().first())
-    }
+    override fun values(): List<Value> = listOf(lh.values().first(), rh.values().first())
 }
 
 class And(lh: Op, rh: Op) : CompositeOp(lh, rh) {

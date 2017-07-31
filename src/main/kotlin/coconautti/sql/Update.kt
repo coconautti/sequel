@@ -21,11 +21,8 @@ class Update(database: Database, private val table: String) : Statement(database
         val values = fields.values.toList()
 
         val clause = where
-        if (clause != null) {
-            return values + clause.values()
-        } else {
-            return values
-        }
+        clause ?: return values
+        return values + clause.values()
     }
 
     override fun toString(): String {
@@ -33,7 +30,7 @@ class Update(database: Database, private val table: String) : Statement(database
         sb.append("UPDATE $table SET $sets")
 
         val clause = where
-        if (clause != null) {
+        clause?.let {
             sb.append(" WHERE $clause")
         }
 

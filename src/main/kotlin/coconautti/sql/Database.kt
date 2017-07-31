@@ -72,10 +72,9 @@ object Database {
         log.debug("with values: ${statement.values().joinToString()}")
 
         val stmt = conn.prepareStatement(statement.toString())
-        for (index in statement.values().indices) {
+        statement.values().indices.forEach { index ->
             stmt.setObject(index + 1, statement.values()[index].value)
         }
-
         return stmt
     }
 
@@ -84,31 +83,27 @@ object Database {
         stmt.execute()
 
         val generatedKeys = stmt.generatedKeys
-        if (generatedKeys.next()) {
-            return generatedKeys.getObject(1)
-        } else {
-            return null
-        }
+        return if (generatedKeys.next()) generatedKeys.getObject(1) else null
     }
 
     internal fun execute(statement: Statement): Any? {
         val conn = connection()
-        conn.use {
-            return execute(conn, statement)
+        return conn.use {
+            execute(conn, statement)
         }
     }
 
     private fun prepareBatchStatement(stmt: PreparedStatement, values: List<Value>) {
         log.debug("Preparing batch statement with values: ${values.joinToString()}")
 
-        for (index in values.indices) {
+        values.indices.forEach { index ->
             stmt.setObject(index + 1, values[index].value)
         }
         stmt.addBatch()
     }
 
     internal fun execute(conn: Connection, statement: BatchStatement): List<Any> {
-        try {
+        return try {
             conn.autoCommit = false
             val stmt = conn.prepareStatement(statement.toString())
             statement.values().forEach { values ->
@@ -122,7 +117,7 @@ object Database {
             while (rs.next()) {
                 results.add(rs.getObject(1))
             }
-            return results
+            results
         } finally {
             conn.autoCommit = true
         }
@@ -130,14 +125,14 @@ object Database {
 
     internal fun execute(statement: BatchStatement): List<Any> {
         val conn = connection()
-        conn.use {
-            return execute(conn, statement)
+        return conn.use {
+            execute(conn, statement)
         }
     }
 
     internal fun query(query: Query): List<Record> {
         val conn = connection()
-        conn.use {
+        return conn.use {
             val stmt = prepareStatement(conn, query)
             val rs = stmt.executeQuery()
 
@@ -155,13 +150,13 @@ object Database {
                 }
                 records.add(record)
             }
-            return records
+            records
         }
     }
 
     internal fun <T> fetch(query: Query, klass: KClass<*>): List<T> {
         val conn = connection()
-        conn.use {
+        return conn.use {
             val stmt = prepareStatement(conn, query)
             val rs = stmt.executeQuery()
 
@@ -175,7 +170,7 @@ object Database {
                 @Suppress("UNCHECKED_CAST")
                 objects.add(obj as T)
             }
-            return objects
+            objects
         }
     }
 }

@@ -26,13 +26,9 @@ class Column(private val name: String) {
 }
 
 class Value(internal val value: Any?) {
-    override fun toString(): String {
-        if (value == null) {
-            return "NULL"
-        } else if (value is String) {
-            return "'$value'"
-        } else {
-            return value.toString()
-        }
+    override fun toString(): String = when (value) {
+        null -> "null"
+        is String -> "'$value'"
+        else -> value.toString()
     }
 }

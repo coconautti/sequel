@@ -10,11 +10,8 @@ class Delete(database: Database, private val table: String) : Statement(database
 
     override fun values(): List<Value> {
         val clause = where
-        if (clause != null) {
-            return clause.values()
-        } else {
-            return emptyList()
-        }
+        clause ?: return emptyList()
+        return clause.values()
     }
 
     override fun toString(): String {
@@ -22,7 +19,7 @@ class Delete(database: Database, private val table: String) : Statement(database
         sb.append("DELETE FROM $table")
 
         val clause = where
-        if (clause != null) {
+        clause?.let {
             sb.append(" WHERE $clause")
         }
 
