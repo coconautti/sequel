@@ -110,15 +110,3 @@ Just as with `insertInto()`, `batchInserInto()` will return a list of generated 
 
 # Todo
 
-- [X] Use prepared statements for all queries
-- [X] Document fetch()
-- [X] Log all database requests
-- [X] Add support for transactions
-- [X] Add support for connection pooling
-- [X] Add support for batch insert
-- [X] Remove javadocs, the API is self explanatory and the docs make the code more verbose
-- [X] Add more tests
-- [X] Clean up codebase
-- [X] Add missing lte, gte, and, or operations
-- [X] Move code to Github
-- [ ] Make a 0.1.0 release
