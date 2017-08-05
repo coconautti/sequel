@@ -3,6 +3,8 @@ package coconautti.sql
 import io.kotlintest.TestCaseContext
 import io.kotlintest.matchers.*
 import io.kotlintest.specs.FunSpec
+import org.joda.time.DateTime
+import java.sql.Timestamp
 
 class DatabaseSpec : FunSpec() {
 
@@ -11,6 +13,7 @@ class DatabaseSpec : FunSpec() {
         Database.createTable("users", false) {
             bigint("id").primaryKey()
             varchar("name", 32)
+            timestamp("created").default("CURRENT_TIMESTAMP()")
         }
 
         test()
@@ -32,22 +35,24 @@ class DatabaseSpec : FunSpec() {
             Database.connect("jdbc:h2:mem:test")
         }
 
-        test("select query returns a two-value record") {
+        test("select query returns a three-value record") {
+            val now = DateTime.now()
             Database.insertInto("users") {
-                columns("id", "name")
-                values(1, "Peter")
+                columns("id", "name", "created")
+                values(1, "Peter", now)
             }.execute()
 
             val stmt = Database.selectFrom("users") {
-                columns("id", "name")
+                columns("id", "name", "created")
                 where("id".eq(1))
             }
             val record = stmt.query().first()
-            record.size().shouldEqual(2)
+            record.size().shouldEqual(3)
 
-            val (id, name) = record as Record2
+            val (id, name, created) = record as Record3
             id as Long shouldEqual(1L)
             name as String shouldEqual("Peter")
+            (created as Timestamp).toString().shouldEqual(now.toString("YYYY-MM-dd HH:mm:ss.SSS"))
         }
 
         test("successful transaction shouldn't call rollback") {

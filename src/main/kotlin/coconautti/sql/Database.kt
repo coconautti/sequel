@@ -4,9 +4,14 @@ import coconautti.ddl.CreateTable
 import coconautti.ddl.DropTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.slf4j.LoggerFactory
+import java.sql.Clob
 import java.sql.Connection
 import java.sql.PreparedStatement
+import java.sql.Timestamp
 import kotlin.reflect.KClass
 
 object Database {
@@ -93,9 +98,18 @@ object Database {
         log.debug("Preparing statement: $statement")
         log.debug("with values: ${statement.values().joinToString()}")
 
+        // Unwrap and convert values to SQL data types
+        val values = statement.values().map { value ->
+            if (value.value is DateTime) {
+                Timestamp.valueOf(value.value.toString("YYYY-MM-dd HH:mm:ss.SSS"))
+            } else {
+                value.value
+            }
+        }
+
         val stmt = conn.prepareStatement(statement.toString())
-        statement.values().indices.forEach { index ->
-            stmt.setObject(index + 1, statement.values()[index].value)
+        values.indices.forEach { index ->
+            stmt.setObject(index + 1, values[index])
         }
         return stmt
     }
@@ -118,8 +132,17 @@ object Database {
     private fun prepareBatchStatement(stmt: PreparedStatement, values: List<Value>) {
         log.debug("Preparing batch statement with values: ${values.joinToString()}")
 
-        values.indices.forEach { index ->
-            stmt.setObject(index + 1, values[index].value)
+        // Unwrap and convert values to SQL data types
+        val convertedValues = values.map { value ->
+            if (value.value is DateTime) {
+                Timestamp.valueOf(value.value.toString("YYYY-MM-dd HH:mm:ss.SSS"))
+            } else {
+                value.value
+            }
+        }
+
+        convertedValues.indices.forEach { index ->
+            stmt.setObject(index + 1, convertedValues[index])
         }
         stmt.addBatch()
     }
@@ -184,10 +207,24 @@ object Database {
 
             @Suppress("UNUSED_VARIABLE")
             val ctor = klass.constructors.first()
+            val formatter = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.SSS")
 
             val objects = ArrayList<T>()
             while (rs.next()) {
-                val values = query.columns().map { rs.getObject(it.toString()) }.toTypedArray()
+                val values = query
+                        .columns()
+                        .map { rs.getObject(it.toString()) }
+                        .map { value ->
+                            if (value is Clob) {
+                                value.getSubString(1, value.length().toInt())
+                            } else if (value is Timestamp) {
+                                DateTime.parse(value.toString(), formatter)
+                            } else {
+                                value
+                            }
+                        }
+                        .toTypedArray()
+                println(values.joinToString())
                 val obj = ctor.call(*values)
                 @Suppress("UNCHECKED_CAST")
                 objects.add(obj as T)

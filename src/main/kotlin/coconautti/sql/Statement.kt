@@ -1,5 +1,6 @@
 package coconautti.sql
 
+import org.joda.time.DateTime
 import java.sql.Connection
 import kotlin.reflect.KClass
 
@@ -26,9 +27,14 @@ class Column(private val name: String) {
 }
 
 class Value(internal val value: Any?) {
+
     override fun toString(): String = when (value) {
-        null -> "null"
-        is String -> "'$value'"
+        null -> "NULL"
+        is String -> if (isFunction(value)) value else "'$value'"
+        is Boolean -> if (value) "TRUE" else "FALSE"
+        is DateTime -> value.toString("YYYY-mm-dd hh:mm:ss.sss")
         else -> value.toString()
     }
+
+    private fun isFunction(value: String): Boolean = (value.contains("(") && value.endsWith(")"))
 }

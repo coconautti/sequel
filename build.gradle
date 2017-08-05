@@ -23,6 +23,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'org.slf4j:slf4j-api:1.7.25'
     compile 'com.zaxxer:HikariCP:2.6.2'
+    compile 'joda-time:joda-time:2.9.9'
 
     testCompile'com.h2database:h2:1.4.196'
     testCompile 'io.kotlintest:kotlintest:2.0.4'

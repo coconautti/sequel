@@ -15,6 +15,24 @@ class CreateTable(private val name: String, private val force: Boolean = true) {
         return column
     }
 
+    fun clob(name: String): Column {
+        val column = Clob(name)
+        columns.add(column)
+        return column
+    }
+
+    fun timestamp(name: String): Column {
+        val column = Timestamp(name)
+        columns.add(column)
+        return column
+    }
+
+    fun boolean(name: String): Column {
+        val column = Bool(name)
+        columns.add(column)
+        return column
+    }
+
     override fun toString(): String {
         val sb = StringBuilder()
         sb.append("CREATE TABLE")
@@ -28,63 +46,4 @@ class CreateTable(private val name: String, private val force: Boolean = true) {
 
         return sb.toString()
     }
-}
-
-abstract class Column(val name: String) {
-    private var primaryKey = false
-    private var autoIncrement = false
-    private var unique = false
-    private var nullable = false
-
-    fun primaryKey(): Column {
-        primaryKey = true
-        return this
-    }
-
-    fun autoIncrement(): Column {
-        autoIncrement = true
-        return this
-    }
-
-    fun unique(): Column {
-        unique = true
-        return this
-    }
-
-    fun nullable(): Column {
-        nullable = true
-        return this
-    }
-
-    abstract fun type(): String
-
-    override fun toString(): String {
-        val sb = StringBuilder()
-        sb.append(name)
-        sb.append(type())
-
-        if (unique) {
-            sb.append(" UNIQUE")
-        }
-
-        if (autoIncrement) {
-            sb.append(" AUTO_INCREMENT")
-        }
-
-        if (primaryKey) {
-            sb.append(" PRIMARY KEY")
-        } else if (!nullable) {
-            sb.append(" NOT NULL")
-        }
-
-        return sb.toString()
-    }
-}
-
-class Varchar(name: String, private val length: Int) : Column(name) {
-    override fun type(): String = " VARCHAR($length)"
-}
-
-class Bigint(name: String) : Column(name) {
-    override fun type(): String = " BIGINT"
 }

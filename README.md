@@ -77,7 +77,7 @@ Database.deleteFrom("users") {
 }.execute()
 ```
 
-You can do transactions too. The rollback closure will be called in case the transaction fails. `rollback` received the `cause` of the rollback as an error string. 
+You can do transactions too. The rollback closure will be called in case the transaction fails. `rollback` receives the `cause` of the rollback as an error string.
 
 ```kotlin
 Database.transaction {
@@ -114,7 +114,18 @@ Just as with `insertInto()`, `batchInserInto()` will return a list of generated 
 
 # Data Definition Language (DDL)
 
-sequel has a very limited support for creating and dropping tables, mainly to facilitate testing.
+sequel has a very limited support for creating and dropping tables, mainly to facilitate testing. SQL data types will be added along the way.
+
+All currently supported SQL data types:
+
+* bigint
+* boolean
+* clob (*)
+* timestamp (**)
+* varchar
+
+(*) sequel doesn't have a special type for clobs. However, `String`s will be saved automatically as clobs and clobs will be read in as `String`s.
+(**) sequel supports JodaTime's DateTime but with a catch. For Records, i.e. when using `query()` you'll get a `java.sql.TimeStamp` as the value type. When using `fetch()` timestamps will be returned as `DateTime`s. This discrepancy will hopefully change in the near future.
 
 Create a table with:
 
@@ -124,6 +135,7 @@ Database.createTable("users") {
     varchar("name")
     varchar("email").unique()
     varchar("description").nullable()
+    timestamp("created").default("CURRENT_TIMESTAMP()")
 }
 ```
 
@@ -136,6 +148,8 @@ Database.dropTable("users")
 ```
 
 As with `createTable`, `dropTable` is executed without any other function calls.
+
+
 
 # Todo
 

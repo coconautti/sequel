@@ -33,4 +33,31 @@ class CreateTableSpec : FunSpec({
         stmt.varchar("bar", 32).nullable()
         stmt.toString().shouldEqual("CREATE TABLE IF NOT EXISTS foo (bar VARCHAR(32))")
     }
+
+    test("create table with default value") {
+        val stmt = CreateTable("emails")
+        stmt.varchar("email", 128).primaryKey()
+        stmt.boolean("verified").default(false)
+        stmt.toString().shouldEqual("CREATE TABLE emails (email VARCHAR(128) PRIMARY KEY, verified BOOLEAN NOT NULL DEFAULT FALSE)")
+    }
+
+    test("create table with timestamp") {
+        val stmt = CreateTable("logins")
+        stmt.bigint("id").primaryKey()
+        stmt.timestamp("date")
+        stmt.toString().shouldEqual("CREATE TABLE logins (id BIGINT PRIMARY KEY, date TIMESTAMP NOT NULL)")
+    }
+
+    test("create table with clob") {
+        val stmt = CreateTable("dump")
+        stmt.clob("data")
+        stmt.toString().shouldEqual("CREATE TABLE dump (data CLOB NOT NULL)")
+    }
+
+    test("create table with function as default value") {
+        val stmt = CreateTable("logins")
+        stmt.bigint("id").primaryKey()
+        stmt.timestamp("date").default("NOW()")
+        stmt.toString().shouldEqual("CREATE TABLE logins (id BIGINT PRIMARY KEY, date TIMESTAMP NOT NULL DEFAULT NOW())")
+    }
 })
