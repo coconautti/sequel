@@ -1,5 +1,6 @@
 package coconautti.sql
 
+import io.kotlintest.TestCaseContext
 import io.kotlintest.matchers.shouldEqual
 import io.kotlintest.specs.BehaviorSpec
 import java.sql.DriverManager
@@ -15,27 +16,31 @@ data class User(val id: Long, val name: String) {
 
 class EntitySpec : BehaviorSpec() {
 
-    init {
-        val conn = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
-        conn.use {
-            val stmt = conn.createStatement()
-            stmt.execute("DROP TABLE IF EXISTS users")
-            stmt.execute("CREATE TABLE IF NOT EXISTS users (id BIGINT PRIMARY KEY, name VARCHAR(32) NOT NULL)")
+    override fun interceptTestCase(context: TestCaseContext, test: () -> Unit) {
+        Database.connect("jdbc:h2:mem:test")
+        Database.createTable("users") {
+            bigint("id").primaryKey()
+            varchar("name", 32)
         }
 
+        test()
+
+        Database.dropTable("users")
+    }
+
+    init {
         given("a user") {
             val user = User(1, "Peter")
             `when`("retrieving") {
                 then("should be able to construct user back") {
-                    Database.connect("jdbc:h2:mem:test").insertInto("users") {
+                    Database.insertInto("users") {
                         columns("id", "name")
                         values(user.id, user.name)
                     }.execute()
 
-                    val record = Database.connect("jdbc:h2:mem:test").selectFrom("users") {
+                    val retrievedUser = Database.selectFrom("users") {
                         columns("id", "name")
-                    }.query().first()
-                    val retrievedUser = User.fromRecord(record)
+                    }.query().map { User.fromRecord(it) }.first()
                     retrievedUser.id.shouldEqual(1L)
                     retrievedUser.name.shouldEqual("Peter")
                 }

@@ -6,7 +6,9 @@ A lightweight SQL query DSL for Kotlin. The library is in an early stage of deve
  
 # Getting started
 
-sequel is currently available in source code format only, thus you need to build the jar and drop it into your project and include it from the project build tool. Include the jar produced by `gradle jar` into your parent project or reference the project from parent project if using Gradle. 
+sequel is currently available in source code format only, thus you need to build the jar and drop it into your project and include it from the project build tool. Include the jar produced by `gradle jar` into your parent project or reference the project from parent project if using Gradle.
+
+# Queries
 
 Before running any queries, make sure to connect to the database:
 
@@ -51,7 +53,7 @@ data class User(val id: Long, val name: String) {
 val user = Database.selectFrom("users") {
     columns("id", "name")
     where("id" eq 1)
-}.query().first().map { User.fromRecord(it) }
+}.query().map { User.fromRecord(record) }.first()
 
 ```
 
@@ -110,8 +112,34 @@ Database.batchInsertInto("users") {
 
 Just as with `insertInto()`, `batchInserInto()` will return a list of generated keys (same limitations apply).
 
+# Data Definition Language (DDL)
+
+sequel has a very limited support for creating and dropping tables, mainly to facilitate testing.
+
+Create a table with:
+
+```kotlin
+Database.createTable("users") {
+    bigint("id").primaryKey().autoIncrement()
+    varchar("name")
+    varchar("email").unique()
+    varchar("description").nullable()
+}
+```
+
+`createTable` is executed automatically once the statement is complete, i.e. it differs from the queries in the sense that no `execute()` etc. methods need to be called.
+
+Dropping a table is easy too:
+
+```kotlin
+Database.dropTable("users")
+```
+
+As with `createTable`, `dropTable` is executed without any other function calls.
+
 # Todo
 
 - [X] Add CI for PRs
+- [X] Add support for creating and dropping tables
 - [ ] Add support for joins
 - [ ] Release 0.2.0

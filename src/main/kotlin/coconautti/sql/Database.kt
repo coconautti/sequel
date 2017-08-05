@@ -1,5 +1,7 @@
 package coconautti.sql
 
+import coconautti.ddl.CreateTable
+import coconautti.ddl.DropTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.slf4j.LoggerFactory
@@ -59,6 +61,26 @@ object Database {
         val batchInsert = BatchInsert(this, table)
         batchInsert.init()
         return batchInsert
+    }
+
+    fun createTable(name: String, force: Boolean = true, init: CreateTable.() -> Unit) {
+        val createTable = CreateTable(name, force)
+        createTable.init()
+
+        val conn = connection()
+        conn.use {
+            val stmt = conn.prepareStatement(createTable.toString())
+            stmt.execute()
+        }
+    }
+
+    fun dropTable(name: String, force: Boolean = true) {
+        val dropTable = DropTable(name, force)
+        val conn = connection()
+        conn.use {
+            val stmt = conn.prepareStatement(dropTable.toString())
+            stmt.execute()
+        }
     }
 
     internal fun connection(): Connection {

@@ -1,118 +1,102 @@
 package coconautti.sql
 
+import io.kotlintest.TestCaseContext
 import io.kotlintest.matchers.*
-import io.kotlintest.specs.BehaviorSpec
-import java.sql.DriverManager
+import io.kotlintest.specs.FunSpec
 
-class DatabaseSpec : BehaviorSpec() {
+class DatabaseSpec : FunSpec() {
 
-    init {
-        val conn = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
-        conn.use {
-            val stmt = conn.createStatement()
-            stmt.execute("CREATE TABLE IF NOT EXISTS users (id BIGINT PRIMARY KEY, name VARCHAR(32) NOT NULL)")
+    override fun interceptTestCase(context: TestCaseContext, test: () -> Unit) {
+        Database.connect("jdbc:h2:mem:test")
+        Database.createTable("users", false) {
+            bigint("id").primaryKey()
+            varchar("name", 32)
         }
 
-        given("a database") {
-            `when`("disconnected") {
-                then("illegal state exception should be thrown") {
-                    val stmt = Database.disconnect().insertInto("users") {
-                        columns("name")
-                        values("Peter")
-                    }
-                    shouldThrow<IllegalStateException> {
-                        stmt.execute()
-                    }
-                }
-            }
+        test()
 
-            `when`("connected") {
-                then("insert record") {
-                    Database.connect("jdbc:h2:mem:test").insertInto("users") {
-                        columns("id", "name")
-                        values(1, "Peter")
-                    }.execute()
-                }
-            }
+        Database.dropTable("users", false)
+    }
 
-            `when`("making select query") {
-                then("a two value record set should be returned") {
-                    val stmt = Database.connect("jdbc:h2:mem:test").selectFrom("users") {
-                        columns("id", "name")
-                        where("id".eq(1))
-                    }
-                    val record = stmt.query().first()
-                    record.size().shouldEqual(2)
+    init {
 
-                    val (id, name) = record as Record2
-                    id as Long shouldEqual(1L)
-                    name as String shouldEqual("Peter")
-                }
+        test("throw illegal state exception of not connected") {
+            Database.disconnect()
+            val stmt = Database.disconnect().insertInto("users") {
+                columns("name")
+                values("Peter")
             }
+            shouldThrow<IllegalStateException> {
+                stmt.execute()
+            }
+            Database.connect("jdbc:h2:mem:test")
+        }
 
-            `when`("making an insert") {
-                then("no errors") {
-                    Database.connect("jdbc:h2:mem:test").insertInto("users") {
-                        columns("id", "name")
-                        values(2, "Donald")
-                    }.execute()
-                }
-            }
+        test("select query returns a two-value record") {
+            Database.insertInto("users") {
+                columns("id", "name")
+                values(1, "Peter")
+            }.execute()
 
-            `when`("transaction is successful") {
-                then("rollback should not be called") {
-                    Database.connect("jdbc:h2:mem:test").transaction {
-                        insertInto("users") {
-                            columns("id", "name")
-                            values(10, "Alice")
-                        }
-                        insertInto("users") {
-                            columns("id", "name")
-                            values(11, "Bob")
-                        }
-                        insertInto("users") {
-                            columns("id", "name")
-                            values(12, "Charlie")
-                        }
-                        rollback { cause ->
-                            fail(cause)
-                        }
-                    }.execute()
-                }
+            val stmt = Database.selectFrom("users") {
+                columns("id", "name")
+                where("id".eq(1))
             }
+            val record = stmt.query().first()
+            record.size().shouldEqual(2)
 
-            `when`("transaction fails") {
-                then("rollback should be called") {
-                    Database.connect("jdbc:h2:mem:test").transaction {
-                        insertInto("users") {
-                            columns("id", "name")
-                            values(20, "Alice")
-                        }
-                        insertInto("user") { // <- Typo in table name causes rollback
-                            columns("id", "name")
-                            values(21, "Bob")
-                        }
-                        insertInto("users") {
-                            columns("id", "name")
-                            values(22, "Charlie")
-                        }
-                        rollback { cause ->
-                            cause.should { it.startsWith("Table \"USER\" not found") }
-                        }
-                    }.execute()
-                }
-            }
+            val (id, name) = record as Record2
+            id as Long shouldEqual(1L)
+            name as String shouldEqual("Peter")
+        }
 
-            `when`("batch insert") {
-                then("no errors") {
-                    Database.connect("jdbc:h2:mem:test").batchInsertInto("users") {
-                        columns("id", "name")
-                        values(30, "Alice")
-                        values(31, "Bob")
-                        values(32, "Charlie")
-                    }.execute()
+        test("successful transaction shouldn't call rollback") {
+            Database.transaction {
+                insertInto("users") {
+                    columns("id", "name")
+                    values(1, "Alice")
                 }
-            }
+                insertInto("users") {
+                    columns("id", "name")
+                    values(2, "Bob")
+                }
+                insertInto("users") {
+                    columns("id", "name")
+                    values(3, "Charlie")
+                }
+                rollback { cause ->
+                    fail(cause)
+                }
+            }.execute()
+        }
+
+        test("failed transaction should call rollback") {
+            Database.transaction {
+                insertInto("users") {
+                    columns("id", "name")
+                    values(1, "Alice")
+                }
+                insertInto("user") { // <- Typo in table name causes rollback
+                    columns("id", "name")
+                    values(2, "Bob")
+                }
+                insertInto("users") {
+                    columns("id", "name")
+                    values(3, "Charlie")
+                }
+                rollback { cause ->
+                    cause.should { it.startsWith("Table \"USER\" not found") }
+                }
+            }.execute()
+        }
+
+        test("batch insert executes without errors") {
+            Database.batchInsertInto("users") {
+                columns("id", "name")
+                values(1, "Alice")
+                values(2, "Bob")
+                values(3, "Charlie")
+            }.execute()
         }
     }
 }
