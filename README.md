@@ -153,8 +153,8 @@ As with `createTable`, `dropTable` is executed without any other function calls.
 
 # Todo
 
-- [X] Add CI for PRs
-- [X] Add support for creating and dropping tables
-- [X] Release 0.2.0
-- [ ] Add support for joins
+- [ ] Add support for limit
+- [ ] Add support for orderBy
 - [ ] Release 0.3.0
+- [ ] Add support for joins
+- [ ] Release 0.4.0
