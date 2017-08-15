@@ -224,7 +224,6 @@ object Database {
                             }
                         }
                         .toTypedArray()
-                println(values.joinToString())
                 val obj = ctor.call(*values)
                 @Suppress("UNCHECKED_CAST")
                 objects.add(obj as T)
