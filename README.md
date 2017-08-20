@@ -2,7 +2,14 @@
 
 [![Build Status](https://travis-ci.org/coconautti/sequel.svg?branch=master)](https://travis-ci.org/coconautti/sequel)
 
-A lightweight SQL query DSL for Kotlin. The library is in an early stage of development, so don't expect the DSL to support anything fancy.
+A lightweight SQL query DSL for Kotlin. The library is in an early stage of development, so don't expect the DSL to support the full SQL spec.
+
+sequel uses basic queries, thus it should work with the most popular database engines. In case you run into something that should work with the database your using, please file a issue in Github.
+
+sequel has been tested to fully work with the following databases: 
+
+* H2
+
  
 # Getting started
 
@@ -149,8 +156,6 @@ Database.dropTable("users")
 
 As with `createTable`, `dropTable` is executed without any other function calls.
 
-
-
 # Todo
 
 - [X] Add support for limit
@@ -159,3 +164,8 @@ As with `createTable`, `dropTable` is executed without any other function calls.
 - [ ] Release 0.3.0
 - [ ] Add support for joins
 - [ ] Release 0.4.0
+
+# License stuff
+
+sequel is Copyright &copy; 2017 Peter Hägg and it has been licensed under Apache License 2.0. Please see LICENSE file for more info.
+
