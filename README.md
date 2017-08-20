@@ -119,6 +119,29 @@ Database.batchInsertInto("users") {
 
 Just as with `insertInto()`, `batchInserInto()` will return a list of generated keys (same limitations apply).
 
+sequel supports pagination with `offset()` and `fetchNext()`. Note that `orderBy()` is required for the query to be legit.
+
+```kotlin
+val pageThree = Database.selectFrom("users") {
+    columns("id", "name")
+    orderBy("name")
+    offset(10)
+    fetchNext(5)
+}.fetch()
+
+```
+
+sequel supports `limit()` as well, in case you want to limit the result set from the beginning only.
+
+```kotlin
+val firstThreeUsers = Database.selectFrom("users") {
+    columns("id", "name")
+    orderBy("name")
+    limit(3)
+}.fetch()
+
+```
+
 # Data Definition Language (DDL)
 
 sequel has a very limited support for creating and dropping tables, mainly to facilitate testing. SQL data types will be added along the way.
