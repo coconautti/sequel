@@ -3,7 +3,6 @@ package coconautti.sql
 import io.kotlintest.TestCaseContext
 import io.kotlintest.matchers.shouldEqual
 import io.kotlintest.specs.BehaviorSpec
-import java.sql.DriverManager
 
 data class User(val id: Long, val name: String) {
     companion object {

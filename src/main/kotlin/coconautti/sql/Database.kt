@@ -6,7 +6,6 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import org.slf4j.LoggerFactory
 import java.sql.Clob
 import java.sql.Connection
