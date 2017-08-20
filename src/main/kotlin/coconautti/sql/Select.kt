@@ -4,6 +4,7 @@ class Select(database: Database, private val table: String) : Query(database) {
     private val columns = ArrayList<Column>()
     private var where: Operation? = null
     private var orderBy: OrderBy? = null
+    private var limit: Int? = null
 
     fun columns(vararg columns: String): Select {
         this.columns.addAll(columns.map { Column(it) })
@@ -19,6 +20,11 @@ class Select(database: Database, private val table: String) : Query(database) {
         val orderBy = OrderBy(column)
         this.orderBy = orderBy
         return orderBy
+    }
+
+    fun limit(by: Int): Select {
+        limit = by
+        return this
     }
 
     private val selection: String
@@ -43,6 +49,10 @@ class Select(database: Database, private val table: String) : Query(database) {
 
         orderBy?.let { orderBy ->
             sb.append(" $orderBy")
+        }
+
+        limit?.let { limit ->
+            sb.append(" LIMIT $limit")
         }
 
         return sb.toString()

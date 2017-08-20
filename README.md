@@ -153,8 +153,9 @@ As with `createTable`, `dropTable` is executed without any other function calls.
 
 # Todo
 
-- [ ] Add support for limit
+- [X] Add support for limit
 - [X] Add support for orderBy
+- [ ] Add support for offset and fetch next 
 - [ ] Release 0.3.0
 - [ ] Add support for joins
 - [ ] Release 0.4.0

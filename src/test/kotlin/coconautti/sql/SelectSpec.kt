@@ -103,5 +103,19 @@ class SelectSpec : BehaviorSpec() {
                 }
             }
         }
+
+        given("a select statement with order by and limit") {
+            val stmt = Database.selectFrom("users") {
+                columns("id", "name")
+                orderBy("name")
+                limit(2)
+            }
+            `when`("extracting SQL") {
+                val sql = stmt.toString()
+                then("it should match expectation") {
+                    sql.shouldEqual("SELECT id, name FROM users ORDER BY name LIMIT 2")
+                }
+            }
+        }
     }
 }
