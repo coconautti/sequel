@@ -64,5 +64,44 @@ class SelectSpec : BehaviorSpec() {
                 }
             }
         }
+
+        given("a select statement with order by") {
+            val stmt = Database.selectFrom("users") {
+                columns("id", "name")
+                orderBy("name")
+            }
+            `when`("extracting SQL") {
+                val sql = stmt.toString()
+                then("it should match expectation") {
+                    sql.shouldEqual("SELECT id, name FROM users ORDER BY name")
+                }
+            }
+        }
+
+        given("a select statement with order by desc") {
+            val stmt = Database.selectFrom("users") {
+                columns("id", "name")
+                orderBy("name").desc()
+            }
+            `when`("extracting SQL") {
+                val sql = stmt.toString()
+                then("it should match expectation") {
+                    sql.shouldEqual("SELECT id, name FROM users ORDER BY name DESC")
+                }
+            }
+        }
+
+        given("a select statement with order by asc") {
+            val stmt = Database.selectFrom("users") {
+                columns("id", "name")
+                orderBy("name").asc()
+            }
+            `when`("extracting SQL") {
+                val sql = stmt.toString()
+                then("it should match expectation") {
+                    sql.shouldEqual("SELECT id, name FROM users ORDER BY name ASC")
+                }
+            }
+        }
     }
 }

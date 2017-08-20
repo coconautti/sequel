@@ -3,6 +3,7 @@ package coconautti.sql
 class Select(database: Database, private val table: String) : Query(database) {
     private val columns = ArrayList<Column>()
     private var where: Operation? = null
+    private var orderBy: OrderBy? = null
 
     fun columns(vararg columns: String): Select {
         this.columns.addAll(columns.map { Column(it) })
@@ -12,6 +13,12 @@ class Select(database: Database, private val table: String) : Query(database) {
     fun where(clause: Operation): Select {
         where = clause
         return this
+    }
+
+    fun orderBy(column: String): OrderBy {
+        val orderBy = OrderBy(column)
+        this.orderBy = orderBy
+        return orderBy
     }
 
     private val selection: String
@@ -32,6 +39,10 @@ class Select(database: Database, private val table: String) : Query(database) {
         val clause = where
         clause?.let {
             sb.append(" WHERE $clause")
+        }
+
+        orderBy?.let { orderBy ->
+            sb.append(" $orderBy")
         }
 
         return sb.toString()
