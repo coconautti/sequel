@@ -117,5 +117,20 @@ class SelectSpec : BehaviorSpec() {
                 }
             }
         }
+
+        given("a select statement with offset and fetch next") {
+            val stmt = Database.selectFrom("users") {
+                columns("id", "name")
+                orderBy("name")
+                offset(10)
+                fetchNext(5)
+            }
+            `when`("extracting SQL") {
+                val sql = stmt.toString()
+                then("it should match expectation") {
+                    sql.shouldEqual("SELECT id, name FROM users ORDER BY name OFFSET 10 ROWS FETCH NEXT 5 ROWS ONLY")
+                }
+            }
+        }
     }
 }

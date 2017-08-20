@@ -5,6 +5,8 @@ class Select(database: Database, private val table: String) : Query(database) {
     private var where: Operation? = null
     private var orderBy: OrderBy? = null
     private var limit: Int? = null
+    private var offset: Int? = null
+    private var fetchNext: Int? = null
 
     fun columns(vararg columns: String): Select {
         this.columns.addAll(columns.map { Column(it) })
@@ -24,6 +26,16 @@ class Select(database: Database, private val table: String) : Query(database) {
 
     fun limit(by: Int): Select {
         limit = by
+        return this
+    }
+
+    fun offset(by: Int): Select {
+        offset = by
+        return this
+    }
+
+    fun fetchNext(rows: Int): Select {
+        fetchNext = rows
         return this
     }
 
@@ -51,8 +63,16 @@ class Select(database: Database, private val table: String) : Query(database) {
             sb.append(" $orderBy")
         }
 
-        limit?.let { limit ->
-            sb.append(" LIMIT $limit")
+        limit?.let { by ->
+            sb.append(" LIMIT $by")
+        }
+
+        offset?.let { by ->
+            sb.append(" OFFSET $by ROWS")
+        }
+
+        fetchNext?.let { rows ->
+            sb.append(" FETCH NEXT $rows ROWS ONLY")
         }
 
         return sb.toString()
