@@ -65,6 +65,7 @@ class CreateTableSpec : FunSpec({
         val stmt = CreateTable("possu")
         stmt.bigserial("id").primaryKey()
         stmt.jsonb("data").nullable()
-        stmt.toString().shouldEqual("CREATE TABLE possu (id BIGSERIAL PRIMARY KEY, data JSONB)")
+        stmt.text("txt").nullable()
+        stmt.toString().shouldEqual("CREATE TABLE possu (id BIGSERIAL PRIMARY KEY, data JSONB, txt TEXT)")
     }
 })

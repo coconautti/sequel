@@ -128,6 +128,7 @@ All currently supported SQL data types:
 * boolean
 * clob (*)
 * jsonb
+* text
 * timestamp (**)
 * varchar
 

@@ -45,6 +45,12 @@ class CreateTable(private val name: String, private val force: Boolean = true) {
         return column
     }
 
+    fun text(name: String): Column {
+        val column = Text(name)
+        columns.add(column)
+        return column
+    }
+
     override fun toString(): String {
         val sb = StringBuilder()
         sb.append("CREATE TABLE")

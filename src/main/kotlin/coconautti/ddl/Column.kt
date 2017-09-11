@@ -90,3 +90,7 @@ class Bigserial(name: String) : Column(name) {
 class Jsonb(name: String) : Column(name) {
     override fun type(): String = " JSONB"
 }
+
+class Text(name: String) : Column(name) {
+    override fun type(): String = " TEXT"
+}
