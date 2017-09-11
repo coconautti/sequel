@@ -118,7 +118,7 @@ object Database {
             }
         }
 
-        val stmt = conn.prepareStatement(statement.toString(dialect))
+        val stmt = conn.prepareStatement(statement.toString(dialect), java.sql.Statement.RETURN_GENERATED_KEYS)
         values.indices.forEach { index ->
             stmt.setObject(index + 1, values[index])
         }
@@ -161,7 +161,7 @@ object Database {
     internal fun execute(conn: Connection, statement: BatchStatement): List<Any> {
         return try {
             conn.autoCommit = false
-            val stmt = conn.prepareStatement(statement.toString(dialect))
+            val stmt = conn.prepareStatement(statement.toString(dialect), java.sql.Statement.RETURN_GENERATED_KEYS)
             statement.values().forEach { values ->
                 prepareBatchStatement(stmt, values)
             }
@@ -235,7 +235,6 @@ object Database {
                             }
                         }
                         .toTypedArray()
-                println(values.joinToString())
                 val obj = ctor.call(*values)
                 @Suppress("UNCHECKED_CAST")
                 objects.add(obj as T)
