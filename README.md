@@ -119,8 +119,10 @@ sequel has a very limited support for creating and dropping tables, mainly to fa
 All currently supported SQL data types:
 
 * bigint
+* bigserial
 * boolean
 * clob (*)
+* jsonb
 * timestamp (**)
 * varchar
 
@@ -156,5 +158,6 @@ As with `createTable`, `dropTable` is executed without any other function calls.
 - [X] Add CI for PRs
 - [X] Add support for creating and dropping tables
 - [X] Release 0.2.0
+- [X] Add support for bigserial & jsonb
 - [ ] Add support for joins
 - [ ] Release 0.3.0

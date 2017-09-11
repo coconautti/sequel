@@ -60,4 +60,11 @@ class CreateTableSpec : FunSpec({
         stmt.timestamp("date").default("NOW()")
         stmt.toString().shouldEqual("CREATE TABLE logins (id BIGINT PRIMARY KEY, date TIMESTAMP NOT NULL DEFAULT NOW())")
     }
+
+    test("create table with bigserial primary key") {
+        val stmt = CreateTable("possu")
+        stmt.bigserial("id").primaryKey()
+        stmt.jsonb("data").nullable()
+        stmt.toString().shouldEqual("CREATE TABLE possu (id BIGSERIAL PRIMARY KEY, data JSONB)")
+    }
 })

@@ -33,6 +33,18 @@ class CreateTable(private val name: String, private val force: Boolean = true) {
         return column
     }
 
+    fun bigserial(name: String): Column {
+        val column = Bigserial(name)
+        columns.add(column)
+        return column
+    }
+
+    fun jsonb(name: String): Column {
+        val column = Jsonb(name)
+        columns.add(column)
+        return column
+    }
+
     override fun toString(): String {
         val sb = StringBuilder()
         sb.append("CREATE TABLE")

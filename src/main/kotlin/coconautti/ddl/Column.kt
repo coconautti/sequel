@@ -82,3 +82,11 @@ class Timestamp(name: String) : Column(name) {
 class Bool(name: String) : Column(name) {
     override fun type(): String = " BOOLEAN"
 }
+
+class Bigserial(name: String) : Column(name) {
+    override fun type(): String = " BIGSERIAL"
+}
+
+class Jsonb(name: String) : Column(name) {
+    override fun type(): String = " JSONB"
+}
