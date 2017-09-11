@@ -27,7 +27,7 @@ class Insert(database: Database, private val table: String) : Statement(database
 
     override fun toString(dialect: SQLDialect): String {
         return when (dialect) {
-            SQLDialect.POSTGRESQL -> "${toString()} RETURNING id"
+            SQLDialect.POSTGRESQL -> "${toString()} RETURNING *"
             else -> toString()
         }
     }

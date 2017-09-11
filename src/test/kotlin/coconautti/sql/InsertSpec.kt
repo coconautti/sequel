@@ -39,7 +39,7 @@ class InsertSpec : BehaviorSpec() {
             `when`("extracting SQL") {
                 val sql = stmt.toString(SQLDialect.POSTGRESQL)
                 then("it should match expectation") {
-                    sql.shouldEqual("INSERT INTO users (name) VALUES (?) RETURNING id")
+                    sql.shouldEqual("INSERT INTO users (name) VALUES (?) RETURNING *")
                 }
             }
         }
