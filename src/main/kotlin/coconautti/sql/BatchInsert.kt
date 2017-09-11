@@ -24,4 +24,11 @@ class BatchInsert(val database: Database, private val table: String) : BatchStat
         val params = values.first().map { "?" }
         return "INSERT INTO $table (${columns.joinToString()}) VALUES (${params.joinToString()})"
     }
+
+    override fun toString(dialect: SQLDialect): String {
+        return when (dialect) {
+            SQLDialect.POSTGRESQL -> "${toString()} RETURNING ID"
+            else -> toString()
+        }
+    }
 }

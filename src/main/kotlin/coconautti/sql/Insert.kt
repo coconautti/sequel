@@ -24,4 +24,11 @@ class Insert(database: Database, private val table: String) : Statement(database
         val params = values.map { "?" }
         return "INSERT INTO $table (${columns.joinToString()}) VALUES (${params.joinToString()})"
     }
+
+    override fun toString(dialect: SQLDialect): String {
+        return when (dialect) {
+            SQLDialect.POSTGRESQL -> "${toString()} RETURNING id"
+            else -> toString()
+        }
+    }
 }

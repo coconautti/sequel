@@ -6,7 +6,6 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import org.slf4j.LoggerFactory
 import java.sql.Clob
 import java.sql.Connection
@@ -14,9 +13,14 @@ import java.sql.PreparedStatement
 import java.sql.Timestamp
 import kotlin.reflect.KClass
 
+enum class SQLDialect {
+    GENERIC, H2, POSTGRESQL
+}
+
 object Database {
     private val log = LoggerFactory.getLogger(Database::class.java)
     private var datasource: HikariDataSource? = null
+    private var dialect = SQLDialect.GENERIC
 
     fun connect(url: String, username: String? = null, password: String? = null): Database {
         val config = HikariConfig()
@@ -24,6 +28,13 @@ object Database {
         config.username = username
         config.password = password
         datasource = HikariDataSource(config)
+
+        if (url.startsWith("jdbc:h2:")) {
+            dialect = SQLDialect.H2
+        } else if (url.startsWith("jdbc:postgresql:")) {
+            dialect = SQLDialect.POSTGRESQL
+        }
+
         return this
     }
 
@@ -95,7 +106,7 @@ object Database {
     }
 
     private fun prepareStatement(conn: Connection, statement: Statement): PreparedStatement {
-        log.debug("Preparing statement: $statement")
+        log.debug("Preparing statement: ${statement.toString(dialect)}")
         log.debug("with values: ${statement.values().joinToString()}")
 
         // Unwrap and convert values to SQL data types
@@ -107,7 +118,7 @@ object Database {
             }
         }
 
-        val stmt = conn.prepareStatement(statement.toString())
+        val stmt = conn.prepareStatement(statement.toString(dialect))
         values.indices.forEach { index ->
             stmt.setObject(index + 1, values[index])
         }
@@ -150,7 +161,7 @@ object Database {
     internal fun execute(conn: Connection, statement: BatchStatement): List<Any> {
         return try {
             conn.autoCommit = false
-            val stmt = conn.prepareStatement(statement.toString())
+            val stmt = conn.prepareStatement(statement.toString(dialect))
             statement.values().forEach { values ->
                 prepareBatchStatement(stmt, values)
             }

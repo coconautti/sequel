@@ -3,6 +3,11 @@
 [![Build Status](https://travis-ci.org/coconautti/sequel.svg?branch=master)](https://travis-ci.org/coconautti/sequel)
 
 A lightweight SQL query DSL for Kotlin. The library is in an early stage of development, so don't expect the DSL to support anything fancy.
+
+sequel has been tested with the following databases:
+
+* H2
+* PostgreSQL
  
 # Getting started
 
@@ -159,5 +164,6 @@ As with `createTable`, `dropTable` is executed without any other function calls.
 - [X] Add support for creating and dropping tables
 - [X] Release 0.2.0
 - [X] Add support for bigserial & jsonb
+- [X] Add support for SQL dialects
 - [ ] Add support for joins
 - [ ] Release 0.3.0

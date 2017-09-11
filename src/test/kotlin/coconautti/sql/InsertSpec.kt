@@ -30,5 +30,18 @@ class InsertSpec : BehaviorSpec() {
                 }
             }
         }
+
+        given("an insert statement for postgres") {
+            val stmt = Database.insertInto("users") {
+                columns("name")
+                values("Peter")
+            }
+            `when`("extracting SQL") {
+                val sql = stmt.toString(SQLDialect.POSTGRESQL)
+                then("it should match expectation") {
+                    sql.shouldEqual("INSERT INTO users (name) VALUES (?) RETURNING id")
+                }
+            }
+        }
     }
 }
