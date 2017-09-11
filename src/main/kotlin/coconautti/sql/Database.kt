@@ -39,6 +39,7 @@ object Database {
     }
 
     fun disconnect(): Database {
+        datasource?.close()
         datasource = null
         return this
     }
@@ -130,7 +131,9 @@ object Database {
         stmt.execute()
 
         val generatedKeys = stmt.generatedKeys
-        return if (generatedKeys.next()) generatedKeys.getObject(1) else null
+        generatedKeys.use {
+            return if (generatedKeys.next()) generatedKeys.getObject(1) else null
+        }
     }
 
     internal fun execute(statement: Statement): Any? {
@@ -170,8 +173,10 @@ object Database {
 
             val results = ArrayList<Any>()
             val rs = stmt.generatedKeys
-            while (rs.next()) {
-                results.add(rs.getObject(1))
+            rs.use {
+                while (rs.next()) {
+                    results.add(rs.getObject(1))
+                }
             }
             results
         } finally {
@@ -193,18 +198,20 @@ object Database {
             val rs = stmt.executeQuery()
 
             val records = ArrayList<Record>()
-            while (rs.next()) {
-                val record = when(rs.metaData.columnCount) {
-                    1 -> Record1(rs.getObject(1))
-                    2 -> Record2(rs.getObject(1), rs.getObject(2))
-                    3 -> Record3(rs.getObject(1), rs.getObject(2), rs.getObject(3))
-                    4 -> Record4(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4))
-                    5 -> Record5(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4), rs.getObject(5))
-                    6 -> Record6(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4), rs.getObject(5), rs.getObject(6))
-                    7 -> Record7(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4), rs.getObject(5), rs.getObject(6), rs.getObject(7))
-                    else -> throw IllegalStateException("Unable to handle 0 or 7+ result sets")
+            rs.use {
+                while (rs.next()) {
+                    val record = when(rs.metaData.columnCount) {
+                        1 -> Record1(rs.getObject(1))
+                        2 -> Record2(rs.getObject(1), rs.getObject(2))
+                        3 -> Record3(rs.getObject(1), rs.getObject(2), rs.getObject(3))
+                        4 -> Record4(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4))
+                        5 -> Record5(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4), rs.getObject(5))
+                        6 -> Record6(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4), rs.getObject(5), rs.getObject(6))
+                        7 -> Record7(rs.getObject(1), rs.getObject(2), rs.getObject(3), rs.getObject(4), rs.getObject(5), rs.getObject(6), rs.getObject(7))
+                        else -> throw IllegalStateException("Unable to handle 0 or 7+ result sets")
+                    }
+                    records.add(record)
                 }
-                records.add(record)
             }
             records
         }
@@ -221,23 +228,25 @@ object Database {
             val formatter = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.SSS")
 
             val objects = ArrayList<T>()
-            while (rs.next()) {
-                val values = query
-                        .columns()
-                        .map { rs.getObject(it.toString()) }
-                        .map { value ->
-                            if (value is Clob) {
-                                value.getSubString(1, value.length().toInt())
-                            } else if (value is Timestamp) {
-                                DateTime.parse(value.toString(), formatter)
-                            } else {
-                                value
+            rs.use {
+                while (rs.next()) {
+                    val values = query
+                            .columns()
+                            .map { rs.getObject(it.toString()) }
+                            .map { value ->
+                                if (value is Clob) {
+                                    value.getSubString(1, value.length().toInt())
+                                } else if (value is Timestamp) {
+                                    DateTime.parse(value.toString(), formatter)
+                                } else {
+                                    value
+                                }
                             }
-                        }
-                        .toTypedArray()
-                val obj = ctor.call(*values)
-                @Suppress("UNCHECKED_CAST")
-                objects.add(obj as T)
+                            .toTypedArray()
+                    val obj = ctor.call(*values)
+                    @Suppress("UNCHECKED_CAST")
+                    objects.add(obj as T)
+                }
             }
             objects
         }
