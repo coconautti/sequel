@@ -27,7 +27,7 @@ class BatchInsert(val database: Database, private val table: String) : BatchStat
 
     override fun toString(dialect: SQLDialect): String {
         return when (dialect) {
-            SQLDialect.POSTGRESQL -> "${toString()} RETURNING ID"
+            SQLDialect.POSTGRESQL -> "${toString()} RETURNING id"
             else -> toString()
         }
     }
